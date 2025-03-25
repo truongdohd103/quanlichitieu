@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5"
+    android:padding="16dp">
+
+    <!-- SearchView để tìm kiếm -->
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/white"
+        android:padding="8dp" />
+
+    <!-- EditText thứ nhất -->
+    <EditText
+        android:id="@+id/et_input_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Từ thời gian"
+        android:padding="12dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:layout_marginBottom="8dp" />
+
+    <!-- EditText thứ hai -->
+    <EditText
+        android:id="@+id/et_input_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Đến thời gian"
+        android:padding="12dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Spinner để chọn khoảng thời gian và Button tìm kiếm -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Spinner
+            android:id="@+id/spinner_categories_with_all"
+            android:entries="@array/categories_with_all"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="12dp" />
+
+        <!-- Button để tìm kiếm -->
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SEARCH"
+            android:backgroundTint="#FFC107"
+            android:padding="12dp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- TextView tổng tiền -->
+    <TextView
+        android:id="@+id/tv_total_expense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tổng tiền: 13760K"
+        android:textSize="18sp"
+        android:padding="16dp"
+        android:background="#FFC107"
+        android:layout_marginBottom="8dp" />
+
+    <!-- RecyclerView để hiển thị danh sách chi tiêu -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_expenses"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
