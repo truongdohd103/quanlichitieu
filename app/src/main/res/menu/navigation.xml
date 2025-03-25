@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/mToday"
-        android:icon="@drawable/ic_today"
-        android:title="Hôm Nay" />
+        android:id="@+id/nav_dashboard"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="Dashboard" />
     <item
-        android:id="@+id/mHistory"
-        android:icon="@drawable/ic_history"
-        android:title="Lịch Sử" />
+        android:id="@+id/nav_today"
+        android:icon="@android:drawable/ic_menu_day"
+        android:title="Today" />
     <item
-        android:id="@+id/mSearch"
-        android:icon="@drawable/ic_statistic"
-        android:title="Tìm Kiếm" />
+        android:id="@+id/nav_history"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="History" />
+    <item
+        android:id="@+id/nav_statistic"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Statistic" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_menu_user"
+        android:title="Profile" />
 </menu>

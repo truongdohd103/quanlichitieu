@@ -6,37 +6,26 @@
     android:background="#F5F5F5"
     android:padding="16dp">
 
-    <!-- Tiêu đề fragment "QUẢN LÝ CHI TIÊU" -->
+    <!-- Tiêu đề fragment "DASHBOARD" -->
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="QUẢN LÝ CHI TIÊU"
+        android:text="DASHBOARD"
         android:textSize="20sp"
         android:textStyle="bold"
         android:padding="16dp"
         android:background="#FFC107" />
 
-    <!-- Tổng chi "Tổng tiền: 12560K" -->
+    <!-- Tổng chi tiêu tháng -->
     <TextView
-        android:id="@+id/tv_total_expense"
+        android:id="@+id/tv_total_month"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tổng tiền: 12560K"
+        android:text="Tổng chi tiêu tháng này: 0K"
         android:textSize="18sp"
         android:padding="16dp"
-        android:layout_marginTop="16dp"
-        android:background="#FFC107" />
-
-    <!-- RecyclerView để hiển thị danh sách chi tiêu -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_expenses"
-        android:layout_width="match_parent"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp" />
+        android:background="#FFC107"
+        android:layout_marginTop="16dp" />
 
 </LinearLayout>

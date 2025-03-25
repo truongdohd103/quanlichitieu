@@ -1,22 +1,33 @@
-package com.example.sqlite0.model;
+package com.example.sqlite0.models;
 
 public class Item {
-    private int id; // Thêm id để xác định mục chi tiêu
+    private int id;        // ID của mục chi tiêu
+    private int userId;    // ID của người dùng sở hữu mục chi tiêu
     private String title;
     private String category;
     private String price;
     private String date;
 
-    // Constructor
-    public Item(int id, String title, String category, String price, String date) {
+    // Constructor đầy đủ (bao gồm cả userId)
+    public Item(int id, int userId, String title, String category, String price, String date) {
         this.id = id;
+        this.userId = userId;
         this.title = title;
         this.category = category;
         this.price = price;
         this.date = date;
     }
 
-    // Constructor không có id (dùng khi thêm mới)
+    // Constructor không có id (dùng khi thêm mới, cần userId)
+    public Item(int userId, String title, String category, String price, String date) {
+        this.userId = userId;
+        this.title = title;
+        this.category = category;
+        this.price = price;
+        this.date = date;
+    }
+
+    // Constructor không có id và userId (giữ lại cho tương thích cũ, nếu cần)
     public Item(String title, String category, String price, String date) {
         this.title = title;
         this.category = category;
@@ -27,6 +38,10 @@ public class Item {
     // Getters
     public int getId() {
         return id;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 
     public String getTitle() {
@@ -48,6 +63,10 @@ public class Item {
     // Setters
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public void setTitle(String title) {

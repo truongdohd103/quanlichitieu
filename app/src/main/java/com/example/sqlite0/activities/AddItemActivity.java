@@ -1,8 +1,7 @@
-package com.example.sqlite0;
+package com.example.sqlite0.activities;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,39 +9,32 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.sqlite0.data.DatabaseHelper;
-import com.example.sqlite0.model.Item;
+import com.example.sqlite0.R;
+import com.example.sqlite0.data.ItemRepository;
+import com.example.sqlite0.models.Item;
+import com.example.sqlite0.utils.PreferenceUtils;
+import com.example.sqlite0.utils.ValidationUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
 public class AddItemActivity extends AppCompatActivity {
-
-    private Spinner spinnerCategory;
-    private EditText etTitle, etPrice, etDate;
-    private Button btnAdd, btnCancel;
-    private DatabaseHelper databaseHelper;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
 
-        // Khởi tạo các thành phần giao diện
-        spinnerCategory = findViewById(R.id.spinner_category);
-        etTitle = findViewById(R.id.et_title);
-        etPrice = findViewById(R.id.et_price);
-        etDate = findViewById(R.id.et_date);
-        btnAdd = findViewById(R.id.btn_add);
-        btnCancel = findViewById(R.id.btn_cancel);
+        Spinner spinnerCategory = findViewById(R.id.spinner_category);
+        EditText etTitle = findViewById(R.id.et_title);
+        EditText etPrice = findViewById(R.id.et_price);
+        EditText etDate = findViewById(R.id.et_date);
+        Button btnAdd = findViewById(R.id.btn_add);
+        Button btnCancel = findViewById(R.id.btn_cancel);
 
-        // Khởi tạo DatabaseHelper
-        databaseHelper = new DatabaseHelper(this);
+        ItemRepository itemRepository = new ItemRepository(this);
+        PreferenceUtils preferenceUtils = new PreferenceUtils(this);
 
-        // Thiết lập Spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.categories,
@@ -51,10 +43,8 @@ public class AddItemActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(R.layout.item_spinner);
         spinnerCategory.setAdapter(adapter);
 
-        // Vô hiệu hóa nhập tay cho etDate
         etDate.setKeyListener(null);
 
-        // Xử lý sự kiện chọn ngày
         etDate.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
@@ -64,7 +54,7 @@ public class AddItemActivity extends AppCompatActivity {
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     AddItemActivity.this,
                     (view, selectedYear, selectedMonth, selectedDay) -> {
-                        String date = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear);
+                        String date = String.format(Locale.getDefault(), "%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear);
                         etDate.setText(date);
                     },
                     year, month, day
@@ -72,57 +62,43 @@ public class AddItemActivity extends AppCompatActivity {
             datePickerDialog.show();
         });
 
-        // Xử lý sự kiện khi nhấn nút Add
         btnAdd.setOnClickListener(v -> {
+            int userId = preferenceUtils.getUserId();
+            if (userId == -1) {
+                Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             String title = etTitle.getText().toString().trim();
             String category = spinnerCategory.getSelectedItem().toString();
             String priceStr = etPrice.getText().toString().trim();
             String date = etDate.getText().toString().trim();
 
             // Kiểm tra các trường có rỗng không
-            if (title.isEmpty() || priceStr.isEmpty() || date.isEmpty()) {
+            if (ValidationUtils.isEmpty(title, priceStr, date)) {
                 Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Kiểm tra định dạng ngày
-            if (!isValidDate(date)) {
+            if (!ValidationUtils.isValidDate(date)) {
                 Toast.makeText(this, "Ngày không hợp lệ, vui lòng chọn lại (dd/MM/yyyy)", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Kiểm tra giá trị giá
-            double priceValue;
-            try {
-                priceValue = Double.parseDouble(priceStr);
-                if (priceValue <= 0) {
-                    Toast.makeText(this, "Giá phải lớn hơn 0", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Giá không hợp lệ, vui lòng nhập số", Toast.LENGTH_SHORT).show();
+            if (!ValidationUtils.isValidPrice(priceStr, 0)) {
+                Toast.makeText(this, "Giá phải lớn hơn 0 và là số hợp lệ", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             String price = priceStr + "K";
-            Item item = new Item(title, category, price, date);
-            databaseHelper.addItem(item);
+            Item item = new Item(userId, title, category, price, date);
+            itemRepository.addItem(item, userId);
             Toast.makeText(this, "Đã thêm mục chi tiêu", Toast.LENGTH_SHORT).show();
             finish();
         });
 
-        // Xử lý sự kiện khi nhấn nút Cancel
         btnCancel.setOnClickListener(v -> finish());
-    }
-
-    // Kiểm tra định dạng ngày
-    private boolean isValidDate(String dateStr) {
-        try {
-            dateFormat.setLenient(false); // Không cho phép phân tích ngày không hợp lệ
-            dateFormat.parse(dateStr);
-            return true;
-        } catch (ParseException e) {
-            return false;
-        }
     }
 }

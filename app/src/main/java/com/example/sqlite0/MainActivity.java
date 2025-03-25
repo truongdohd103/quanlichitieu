@@ -2,16 +2,22 @@ package com.example.sqlite0;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import com.example.sqlite0.adapter.ViewPagerAdapter;
-import com.example.sqlite0.data.DatabaseHelper;
-import com.example.sqlite0.model.Item;
+
+import com.example.sqlite0.activities.AddItemActivity;
+import com.example.sqlite0.activities.LoginActivity;
+import com.example.sqlite0.adapters.ViewPagerAdapter;
+import com.example.sqlite0.data.ItemRepository;
+import com.example.sqlite0.fragments.FragmentDashboard;
+import com.example.sqlite0.fragments.FragmentHistory;
+import com.example.sqlite0.fragments.FragmentProfile;
+import com.example.sqlite0.fragments.FragmentStatistic;
+import com.example.sqlite0.fragments.FragmentToday;
+import com.example.sqlite0.models.Item;
+import com.example.sqlite0.utils.PreferenceUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -19,7 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private ViewPager viewPager;
     private FloatingActionButton floatingActionButton;
-    private DatabaseHelper databaseHelper;
+    private PreferenceUtils preferenceUtils;
+    private ItemRepository itemRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,59 +38,74 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.view_pager);
         floatingActionButton = findViewById(R.id.fab_add);
 
-        // Khởi tạo DatabaseHelper
-        databaseHelper = new DatabaseHelper(this);
+        preferenceUtils = new PreferenceUtils(this);
+        itemRepository = new ItemRepository(this);
 
-        // Kiểm tra xem bảng có dữ liệu không, nếu không thì thêm dữ liệu mẫu (Phương Pháp 2)
-        if (databaseHelper.isTableEmpty()) {
-            databaseHelper.addItem(new Item("Quan bo", "Mua sắm", "500K", "25/03/2025"));
-            databaseHelper.addItem(new Item("Tiền điện", "Tiền điện", "1200K", "24/03/2025"));
-            databaseHelper.addItem(new Item("Tiền nhà", "Tiền nhà", "5000K", "23/03/2025"));
+        // Kiểm tra trạng thái đăng nhập
+        int userId = preferenceUtils.getUserId();
+        if (userId == -1) {
+            // Nếu chưa đăng nhập, chuyển hướng về LoginActivity
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
         }
 
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AddItemActivity.class);
-                startActivity(intent);
-            }
-        });
+        // Thêm dữ liệu mặc định nếu đây là lần đăng nhập đầu tiên
+//        if (preferenceUtils.isFirstLogin() && itemRepository.isTableEmpty()) {
+//            itemRepository.addItem(new Item(userId, "Quần bò", "Mua sắm", "500K", "25/03/2025"), userId);
+//            itemRepository.addItem(new Item(userId, "Tiền điện", "Khác", "1200K", "24/03/2025"), userId);
+//            itemRepository.addItem(new Item(userId, "Tiền nhà", "Khác", "5000K", "23/03/2025"), userId);
+//            preferenceUtils.setFirstLogin(false); // Đánh dấu đã thêm dữ liệu mặc định
+//        }
 
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        // Thiết lập ViewPager và Adapter
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), ViewPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        adapter.addFragment(new FragmentDashboard(), "Dashboard");
+        adapter.addFragment(new FragmentToday(), "Today");
+        adapter.addFragment(new FragmentHistory(), "History");
+        adapter.addFragment(new FragmentStatistic(), "Statistic");
+        adapter.addFragment(new FragmentProfile(), "Profile"); // Thêm FragmentProfile
         viewPager.setAdapter(adapter);
+
+        // Liên kết ViewPager với BottomNavigationView
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
             @Override
             public void onPageSelected(int position) {
-                switch (position) {
-                    case 0:
-                        bottomNavigationView.getMenu().findItem(R.id.mToday).setChecked(true);
-                        break;
-                    case 1:
-                        bottomNavigationView.getMenu().findItem(R.id.mHistory).setChecked(true);
-                        break;
-                    case 2:
-                        bottomNavigationView.getMenu().findItem(R.id.mSearch).setChecked(true);
-                        break;
-                }
+                bottomNavigationView.getMenu().getItem(position).setChecked(true);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-            }
+            public void onPageScrollStateChanged(int state) {}
         });
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if (item.getItemId() == R.id.mToday) viewPager.setCurrentItem(0);
-                if (item.getItemId() == R.id.mHistory) viewPager.setCurrentItem(1);
-                if (item.getItemId() == R.id.mSearch) viewPager.setCurrentItem(2);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_dashboard) {
+                viewPager.setCurrentItem(0);
+                return true;
+            } else if (itemId == R.id.nav_today) {
+                viewPager.setCurrentItem(1);
+                return true;
+            } else if (itemId == R.id.nav_history) {
+                viewPager.setCurrentItem(2);
+                return true;
+            } else if (itemId == R.id.nav_statistic) {
+                viewPager.setCurrentItem(3);
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                viewPager.setCurrentItem(4); // Chuyển đến FragmentProfile
                 return true;
             }
+            return false;
+        });
+
+        floatingActionButton.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, AddItemActivity.class);
+            startActivity(intent);
         });
     }
 }
